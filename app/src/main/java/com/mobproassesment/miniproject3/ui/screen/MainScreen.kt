@@ -20,7 +20,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -53,7 +52,9 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingExcept
 import com.mobproassesment.miniproject3.BuildConfig
 import com.mobproassesment.miniproject3.R
 import com.mobproassesment.miniproject3.model.Tanaman
+import com.mobproassesment.miniproject3.model.User
 import com.mobproassesment.miniproject3.network.TanamanApi
+import com.mobproassesment.miniproject3.network.UserDataStore
 import com.mobproassesment.miniproject3.ui.theme.Miniproject3Theme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -63,6 +64,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen() {
     val context = LocalContext.current
+    val dataStore = UserDataStore(context)
+    val user by dataStore.userFlow.collectAsState(initial = User())
     Scaffold(
         topBar = {
             TopAppBar(
@@ -75,7 +78,12 @@ fun MainScreen() {
                 ),
                 actions = {
                     IconButton(onClick = {
-                        CoroutineScope(Dispatchers.IO).launch { signIn(context) }
+                        if (user.email.isEmpty()) {
+                            CoroutineScope(Dispatchers.IO).launch { signIn(context, dataStore) }
+                        }
+                        else{
+                            Log.d("SIGN-IN","User: $user")
+                        }
                     }) {
                         Icon(
                             painter = painterResource(R.drawable.account_circle_24),
@@ -164,7 +172,7 @@ fun ListItem(tanaman: Tanaman) {
     }
 }
 
-private suspend fun signIn(context: Context) {
+private suspend fun signIn(context: Context, dataStore: UserDataStore) {
     val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
         .setFilterByAuthorizedAccounts(false)
         .setServerClientId(BuildConfig.API_KEY)
@@ -176,18 +184,21 @@ private suspend fun signIn(context: Context) {
     try {
         val credentialManager = CredentialManager.create(context)
         val result = credentialManager.getCredential(context, request)
-        handleSignIn(result)
+        handleSignIn(result,dataStore)
     } catch (e: GetCredentialException) {
         Log.e("SIGN-IN", "Error: ${e.errorMessage}")
     }
 }
-private fun handleSignIn(result: GetCredentialResponse) {
+private suspend fun handleSignIn(result: GetCredentialResponse, dataStore: UserDataStore) {
     val credential = result.credential
     if (credential is CustomCredential &&
         credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
         try {
             val googleId = GoogleIdTokenCredential.createFrom(credential.data)
-            Log.d("SIGN-IN", "User email: ${googleId.id}")
+            val name = googleId.displayName ?:""
+            val email = googleId.id
+            val photoUrl = googleId.profilePictureUri.toString()
+            dataStore.saveData(User(name, email, photoUrl))
         } catch (e: GoogleIdTokenParsingException) {
             Log.e("SIGN-IN", "Error: ${e.message}")
         }
