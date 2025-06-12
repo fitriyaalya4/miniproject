@@ -29,5 +29,5 @@ object TanamanApi{
     fun getTanamanUrl(gambar: String): String {
         return "https://asessment3-api-production-c0f9.up.railway.app/storage/$gambar"
     }
-    enum class ApiStatus { LOADING, SUCCESS }
+    enum class ApiStatus { LOADING, SUCCESS, FAILED }
 }

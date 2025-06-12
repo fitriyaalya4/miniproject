@@ -18,7 +18,7 @@ class MainViewModel : ViewModel() {
     init {
         retrieveData()
     }
-    private fun retrieveData() {
+    fun retrieveData() {
         viewModelScope.launch(Dispatchers.IO) {
             status.value = TanamanApi.ApiStatus.LOADING
             try {
@@ -26,6 +26,7 @@ class MainViewModel : ViewModel() {
                 status.value = TanamanApi.ApiStatus.SUCCESS
             } catch (e: Exception) {
                 Log.d("MainViewModel", "Failure: ${e.message}")
+                status.value = TanamanApi.ApiStatus.FAILED
             }
         }
     }
