@@ -26,4 +26,7 @@ object TanamanApi{
     val service: TanamanApiAervice by lazy {
         retrofit.create(TanamanApiAervice::class.java)
     }
+    fun getTanamanUrl(gambar: String): String {
+        return "https://asessment3-api-production-c0f9.up.railway.app/storage/$gambar"
+    }
 }
