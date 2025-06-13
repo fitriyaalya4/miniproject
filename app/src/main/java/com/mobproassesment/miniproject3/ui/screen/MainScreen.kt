@@ -73,6 +73,7 @@ import com.mobproassesment.miniproject3.BuildConfig
 import com.mobproassesment.miniproject3.R
 import com.mobproassesment.miniproject3.model.Tanaman
 import com.mobproassesment.miniproject3.model.User
+import com.mobproassesment.miniproject3.network.ApiStatus
 import com.mobproassesment.miniproject3.network.TanamanApi
 import com.mobproassesment.miniproject3.network.UserDataStore
 import com.mobproassesment.miniproject3.ui.theme.Miniproject3Theme
@@ -179,7 +180,7 @@ fun ScreenContent(viewModel: MainViewModel, userId: String,modifier: Modifier = 
     }
 
     when (status) {
-        TanamanApi.ApiStatus.LOADING -> {
+        ApiStatus.LOADING-> {
             Box(
                 modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -187,7 +188,7 @@ fun ScreenContent(viewModel: MainViewModel, userId: String,modifier: Modifier = 
                 CircularProgressIndicator()
             }
         }
-        TanamanApi.ApiStatus.SUCCESS -> {
+        ApiStatus.SUCCESS-> {
             LazyVerticalGrid(
                 modifier = modifier.fillMaxSize().padding(4.dp),
                 columns = GridCells.Fixed(2),
@@ -196,7 +197,7 @@ fun ScreenContent(viewModel: MainViewModel, userId: String,modifier: Modifier = 
                 items(data) { ListItem(tanaman = it) }
             }
         }
-        TanamanApi.ApiStatus.FAILED -> {
+        ApiStatus.FAILED-> {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,

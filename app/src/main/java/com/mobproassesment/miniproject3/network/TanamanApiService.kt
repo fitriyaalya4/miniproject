@@ -32,20 +32,22 @@ interface TanamanApiService {
     ): List<Tanaman>
 
     @Multipart
-    @POST("tanaman")
+    @POST("tanaman/store")
     suspend fun postTanaman(
-        @Part("userId") userId: String,
+        @Header("Authorization") userId: String,
         @Part("nama") nama: RequestBody,
-        @Part image: MultipartBody.Part
+        @Part gambar: MultipartBody.Part
     ): OpStatus
 }
 
-object TanamanApi{
+object TanamanApi {
     val service: TanamanApiService by lazy {
         retrofit.create(TanamanApiService::class.java)
     }
+
     fun getTanamanUrl(gambar: String): String {
         return "https://asessment3-api-production-c0f9.up.railway.app/storage/$gambar"
     }
-    enum class ApiStatus { LOADING, SUCCESS, FAILED }
 }
+    enum class ApiStatus { LOADING, SUCCESS, FAILED }
+

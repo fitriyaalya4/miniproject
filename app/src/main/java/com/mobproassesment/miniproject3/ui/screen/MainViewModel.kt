@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobproassesment.miniproject3.model.Tanaman
+import com.mobproassesment.miniproject3.network.ApiStatus
 import com.mobproassesment.miniproject3.network.TanamanApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,7 @@ import java.io.ByteArrayOutputStream
 class MainViewModel : ViewModel() {
     var data = mutableStateOf(emptyList<Tanaman>())
             private set
-    var status = MutableStateFlow(TanamanApi.ApiStatus.LOADING)
+    var status = MutableStateFlow(ApiStatus.LOADING)
             private set
 
     var errorMessage = mutableStateOf<String?>(null)
@@ -26,13 +27,13 @@ class MainViewModel : ViewModel() {
 
     fun retrieveData(userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            status.value = TanamanApi.ApiStatus.LOADING
+            status.value = ApiStatus.LOADING
             try {
                 data.value = TanamanApi.service.getTanaman(userId)
-                status.value = TanamanApi.ApiStatus.SUCCESS
+                status.value = ApiStatus.SUCCESS
             } catch (e: Exception) {
                 Log.d("MainViewModel", "Failure: ${e.message}")
-                status.value = TanamanApi.ApiStatus.FAILED
+                status.value = ApiStatus.FAILED
             }
         }
     }
@@ -62,7 +63,7 @@ class MainViewModel : ViewModel() {
         val requestBody = byteArray.toRequestBody(
             "image/jpg".toMediaTypeOrNull(),0, byteArray.size)
         return MultipartBody.Part.createFormData(
-            "image", "image.jpg", requestBody
+            "gambar", "image.jpg", requestBody
         )
     }
     fun clearMessage() { errorMessage.value = null}
