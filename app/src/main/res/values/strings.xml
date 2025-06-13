@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Miniproject3</string>
+    <string name="app_name">MoodFlowers</string>
     <string name="gambar">Gambar %1$s</string>
     <string name="input_invalid">Tidak boleh kosong.</string>
     <string name="error">Gagal memuat data.. Koneksi error.</string>Add commentMore actions
