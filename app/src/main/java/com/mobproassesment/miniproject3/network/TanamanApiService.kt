@@ -8,11 +8,13 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Path
 
 private const val BASE_URL = "https://asessment3-api-production-c0f9.up.railway.app/api/"
 
@@ -28,7 +30,7 @@ private val retrofit = Retrofit.Builder()
 interface TanamanApiService {
     @GET("tanaman")
     suspend fun getTanaman(
-        @Header ("Authorization") userId: String
+        @Header("Authorization") userId: String
     ): List<Tanaman>
 
     @Multipart
@@ -38,6 +40,13 @@ interface TanamanApiService {
         @Part("nama") nama: RequestBody,
         @Part gambar: MultipartBody.Part
     ): OpStatus
+
+    @DELETE("tanaman/delete/{id}")
+    suspend fun deleteTanaman(
+        @Header("Authorization") userId: String,
+        @Path("id") hewanId: String
+    ): OpStatus
+
 }
 
 object TanamanApi {

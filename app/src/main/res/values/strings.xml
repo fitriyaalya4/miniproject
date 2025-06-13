@@ -9,6 +9,9 @@
     <string name="logout">Logout</string>
     <string name="tambah_tanaman">Tambah Tanaman</string>
     <string name="nama">Nama</string>
+    <string name="hapus_konfirmasi">Konfirmasi Hapus</string>
+    <string name="hapus_dialog">Apakah kamu yakin ingin menghapus data ini?</string>
+    <string name="hapus">Hapus</string>
     <string name="batal">Batal</string>
     <string name="simpan">Simpan</string>
 </resources>

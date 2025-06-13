@@ -16,21 +16,29 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -194,9 +202,17 @@ fun ScreenContent(viewModel: MainViewModel, userId: String,modifier: Modifier = 
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(bottom = 80.dp)
             ) {
-                items(data) { ListItem(tanaman = it) }
+                items(data) {
+                    ListItem(
+                        tanaman = it,
+                        onDelete = { id ->
+                            viewModel.deleteData(userId, id)
+                        }
+                    )
+                }
             }
         }
+
         ApiStatus.FAILED-> {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -217,12 +233,14 @@ fun ScreenContent(viewModel: MainViewModel, userId: String,modifier: Modifier = 
 }
 
 @Composable
-fun ListItem(tanaman: Tanaman) {
+fun ListItem(tanaman: Tanaman, onDelete: (String) -> Unit) {
+    var showDialogDelete by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .padding(4.dp)
             .border(1.dp, Color.Gray),
-            contentAlignment = Alignment.BottomCenter
+        contentAlignment = Alignment.BottomCenter
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
@@ -235,16 +253,79 @@ fun ListItem(tanaman: Tanaman) {
             error = painterResource(id = R.drawable.broken_img),
             modifier = Modifier.fillMaxWidth().padding(4.dp)
         )
-        Column (modifier = Modifier.fillMaxWidth().padding(4.dp)
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                .padding(4.dp)
+                .align(Alignment.BottomStart)
                 .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.5f))
                 .padding(4.dp)
-        ){
+        ) {
             Text(
                 text = tanaman.nama,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
         }
+            if (tanaman.mine == 1) {
+                IconButton(
+                    onClick = { showDialogDelete = true },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(8.dp)
+                        .background(Color(0f, 0f, 0f, 0.3f), shape = CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.hapus),
+                        tint = Color.White
+                    )
+                }
+            }
+        }
+    if (showDialogDelete) {
+        AlertDialog(
+            onDismissRequest = { showDialogDelete = false },
+            title = {
+                Text(
+                    text = stringResource(R.string.hapus_konfirmasi),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.hapus_dialog),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 8.dp, bottom = 8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            showDialogDelete = false
+                            onDelete(tanaman.id)
+                        },
+                        colors = MaterialTheme.colorScheme.run {
+                            ButtonDefaults.buttonColors(containerColor = error)
+                        }
+                    ) {
+                        Text(text = stringResource(R.string.hapus))
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    OutlinedButton(onClick = { showDialogDelete = false }) {
+                        Text(text = stringResource(R.string.batal))
+                    }
+                }
+            },
+            shape = MaterialTheme.shapes.large,
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 4.dp
+        )
     }
 }
 
