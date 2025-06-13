@@ -27,7 +27,9 @@ private val retrofit = Retrofit.Builder()
 
 interface TanamanApiService {
     @GET("tanaman")
-    suspend fun getTanaman(): List<Tanaman>
+    suspend fun getTanaman(
+        @Header ("Authorization") userId: String
+    ): List<Tanaman>
 
     @Multipart
     @POST("tanaman")
