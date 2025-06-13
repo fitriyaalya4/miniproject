@@ -41,12 +41,21 @@ interface TanamanApiService {
         @Part gambar: MultipartBody.Part
     ): OpStatus
 
+
     @DELETE("tanaman/delete/{id}")
     suspend fun deleteTanaman(
         @Header("Authorization") userId: String,
-        @Path("id") hewanId: String
+        @Path("id") tanamanId: String
     ): OpStatus
 
+    @Multipart
+    @POST("tanaman/edit/{id}")
+    suspend fun editTanaman(
+        @Header("Authorization") userId: String,
+        @Path("id") tanamanId: String,
+        @Part("nama") nama: RequestBody,
+        @Part gambar: MultipartBody.Part? = null
+    ): OpStatus
 }
 
 object TanamanApi {

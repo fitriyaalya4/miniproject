@@ -76,6 +76,28 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    fun updateData(userId: String, tanamanId: String, nama: String, bitmap: Bitmap) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = TanamanApi.service.editTanaman(
+                    userId,
+                    tanamanId,
+                    nama.toRequestBody("text/plain".toMediaTypeOrNull()),
+                    bitmap.toMultipartBody()
+                )
+
+                if(result.status == "success")
+                    retrieveData(userId)
+                else
+                    throw Exception(result.message)
+            } catch (e: Exception) {
+                Log.d("MainViewModel", "Failure: ${e.message}")
+            }
+        }
+    }
+
+
+
     private fun Bitmap.toMultipartBody(): MultipartBody.Part {
         val stream = ByteArrayOutputStream()
         compress(Bitmap.CompressFormat.JPEG, 80, stream)

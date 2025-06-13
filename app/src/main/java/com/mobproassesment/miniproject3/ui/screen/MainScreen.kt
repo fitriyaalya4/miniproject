@@ -1,10 +1,12 @@
 package com.mobproassesment.miniproject3.ui.screen
 
+import TanamanEditDialog
 import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
@@ -29,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -191,7 +194,7 @@ fun ScreenContent(viewModel: MainViewModel, userId: String,modifier: Modifier = 
         ApiStatus.LOADING-> {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
             }
@@ -207,6 +210,11 @@ fun ScreenContent(viewModel: MainViewModel, userId: String,modifier: Modifier = 
                         tanaman = it,
                         onDelete = { id ->
                             viewModel.deleteData(userId, id)
+                        },
+                        onEdit = { id, nama, bitmap ->
+                            if (bitmap != null) {
+                                viewModel.updateData(userId, id, nama, bitmap)
+                            }
                         }
                     )
                 }
@@ -233,8 +241,11 @@ fun ScreenContent(viewModel: MainViewModel, userId: String,modifier: Modifier = 
 }
 
 @Composable
-fun ListItem(tanaman: Tanaman, onDelete: (String) -> Unit) {
+fun ListItem(tanaman: Tanaman, onDelete: (String) -> Unit, onEdit: (String, String, Bitmap?) -> Unit) {
+
     var showDialogDelete by remember { mutableStateOf(false) }
+    var showDialogEdit by remember { mutableStateOf(false) }
+    var currentBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     Box(
         modifier = Modifier
@@ -251,36 +262,59 @@ fun ListItem(tanaman: Tanaman, onDelete: (String) -> Unit) {
             contentScale = ContentScale.Crop,
             placeholder = painterResource(id = R.drawable.loading_img),
             error = painterResource(id = R.drawable.broken_img),
-            modifier = Modifier.fillMaxWidth().padding(4.dp)
+            modifier = Modifier.fillMaxWidth().padding(4.dp),
+            onSuccess = { result ->
+                val drawable = result.result.drawable
+                if (drawable is BitmapDrawable) {
+                    currentBitmap = drawable.bitmap
+                }
+            }
         )
         Column(
             modifier = Modifier.fillMaxWidth().padding(4.dp)
-                .align(Alignment.BottomStart)
                 .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.5f))
                 .padding(4.dp)
         ) {
-            Text(
-                text = tanaman.nama,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-        }
-            if (tanaman.mine == 1) {
-                IconButton(
-                    onClick = { showDialogDelete = true },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(8.dp)
-                        .background(Color(0f, 0f, 0f, 0.3f), shape = CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.hapus),
-                        tint = Color.White
-                    )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = tanaman.nama,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.weight(1f)
+                )
+                if (tanaman.mine == 1) {
+                    Row {
+                        IconButton(
+                            onClick = { showDialogEdit = true },
+                            modifier = Modifier
+                                .background(Color(0f, 0f, 0f, 0.3f), shape = CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = stringResource(R.string.edit),
+                                tint = Color.White
+                            )
+                        }
+                        IconButton(
+                            onClick = { showDialogDelete = true },
+                            modifier = Modifier
+                                .background(Color(0f, 0f, 0f, 0.3f), shape = CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.hapus),
+                                tint = Color.White
+                            )
+                        }
+                    }
                 }
             }
         }
+    }
     if (showDialogDelete) {
         AlertDialog(
             onDismissRequest = { showDialogDelete = false },
@@ -326,7 +360,20 @@ fun ListItem(tanaman: Tanaman, onDelete: (String) -> Unit) {
             tonalElevation = 4.dp
         )
     }
+    if (showDialogEdit) {
+        TanamanEditDialog(
+            initialNama = tanaman.nama,
+            initialBitmap = currentBitmap,
+            onDismissRequest = { showDialogEdit = false },
+            onConfirmation = { nama, bitmap ->
+                showDialogEdit = false
+                onEdit(tanaman.id, nama, bitmap)
+            }
+        )
+    }
 }
+
+
 
 private suspend fun signIn(context: Context, dataStore: UserDataStore) {
     val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
