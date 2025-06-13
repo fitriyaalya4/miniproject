@@ -86,9 +86,12 @@ fun MainScreen() {
     val user by dataStore.userFlow.collectAsState(initial = User())
 
     var showDialog by remember { mutableStateOf(false) }
+    var showTanamanDialog by remember { mutableStateOf(false) }
+
     var bitmap: Bitmap? by remember { mutableStateOf(null) }
     val launcher = rememberLauncherForActivityResult(CropImageContract()) {
         bitmap = getCroppedImage(context.contentResolver, it)
+        if (bitmap != null) showTanamanDialog = true
     }
 
     Scaffold(
@@ -105,14 +108,13 @@ fun MainScreen() {
                     IconButton(onClick = {
                         if (user.email.isEmpty()) {
                             CoroutineScope(Dispatchers.IO).launch { signIn(context, dataStore) }
-                        }
-                        else{
+                        } else {
                             showDialog = true
                         }
                     }) {
                         Icon(
                             painter = painterResource(R.drawable.account_circle_24),
-                            contentDescription =  stringResource(R.string.profile),
+                            contentDescription = stringResource(R.string.profile),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -138,12 +140,20 @@ fun MainScreen() {
         }
     ) { innerPadding ->
         ScreenContent(Modifier.padding(innerPadding))
-        if (showDialog){
+        if (showDialog) {
             ProfilDialog(
                 user = user,
-                onDismissRequest = { showDialog = false}) {
-                CoroutineScope(Dispatchers.IO).launch { signOut(context,dataStore) }
+                onDismissRequest = { showDialog = false }) {
+                CoroutineScope(Dispatchers.IO).launch { signOut(context, dataStore) }
                 showDialog = false
+            }
+        }
+        if (showTanamanDialog) {
+            TanamanDialog(
+                bitmap = bitmap,
+                onDismissRequest = { showTanamanDialog = false }) { nama ->
+                Log.d("TAMBAH", "$nama ditambahkan.")
+                showTanamanDialog = false
             }
         }
     }
