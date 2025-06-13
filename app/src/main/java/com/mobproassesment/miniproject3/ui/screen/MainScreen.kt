@@ -254,8 +254,7 @@ fun ListItem(tanaman: Tanaman, onDelete: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(4.dp)
         )
         Column(
-            modifier = Modifier.fillMaxWidth()
-                .padding(4.dp)
+            modifier = Modifier.fillMaxWidth().padding(4.dp)
                 .align(Alignment.BottomStart)
                 .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.5f))
                 .padding(4.dp)
